@@ -1,7 +1,4 @@
 '''
-Created on Dec 11, 2018
-
-@author: john.schoenberger
 '''
 QT_API = 'PYQT5' #
 

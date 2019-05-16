@@ -5,7 +5,7 @@ import os, sys
 from constants import IMAGE_DIR
 from plotwidget import PlotWidget
 import logging
-logger = logging.getLogger('log.' + __name__)
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging
 
 
@@ -14,9 +14,9 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.setWindowTitle('Plot Example')
         self.setStyleSheet('QToolBar{spacing:5px;};') #QStatusBar.item {border: none;}
+        self.plotwidget = PlotWidget()
         self.createActions()
         self.createToolBar()
-        self.plotwidget = PlotWidget()
 
         self.setCentralWidget(self.plotwidget)
         self.show()
@@ -28,11 +28,11 @@ class MainWindow(QMainWindow):
         '''
         icon = QIcon(os.path.join(IMAGE_DIR, 'back.png'))
         self.backAction = QAction(icon, "Back", self, shortcut=QKeySequence.Back,
-                 triggered=self.back_action)
+                 triggered=self.plotwidget.zoom_back)
         
         icon = QIcon(os.path.join(IMAGE_DIR, 'forward.png'))
         self.forwardAction = QAction(icon, "Forward", self, shortcut=QKeySequence.Forward,
-                 triggered=self.forward_action)
+                 triggered=self.plotwidget.zoom_forward)
         
         icon = QIcon(os.path.join(IMAGE_DIR, 'zoom.png'))
         self.zoomAction = QAction(icon, "&Zoom", self, shortcut="Ctrl+Z",
@@ -54,12 +54,7 @@ class MainWindow(QMainWindow):
         self.toolBar.addAction(self.zoomAction)
         self.toolBar.addAction(self.zoomConstrainedAction)
         self.toolBar.addAction(self.settingsAction) 
-    
-    def back_action(self):
-        logger.debug('Back')
-        
-    def forward_action(self):
-        logger.debug('Forward')
+
         
     def zoom(self):
         pass

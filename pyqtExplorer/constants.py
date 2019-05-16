@@ -23,5 +23,13 @@ console.setFormatter(formatter)
 root_logger = logging.getLogger('')
 root_logger.addHandler(console) 
 
-#Package logger. 
-logger = logging.getLogger('log')
+#Package logger can be useful if you are using other packages that have verbose logs that you want to turn off
+# logger = logging.getLogger('log') #log is the name of the package logger.
+
+'''
+To use the logger in a python file:
+import logging
+logger = logging.getLogger('log.' + __name__) #package logger OR
+logger = logging.getLogger(__name__) #root logger
+logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging
+'''
