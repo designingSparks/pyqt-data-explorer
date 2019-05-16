@@ -7,6 +7,10 @@ import numpy as np
 import os, sys
 import time
 import threading
+import logging
+import logging
+logger = logging.getLogger('log.' + __name__)
+logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging
 
 
 class PlotWidget(pg.GraphicsLayoutWidget):
@@ -122,7 +126,7 @@ class PlotWidget(pg.GraphicsLayoutWidget):
             delta = point - self._startCoord
             dx = delta.x()
             dy = delta.y()
-            print('dx={}, dy={}'.format(dx, dy))
+            logger.debug('dx={}, dy={}'.format(dx, dy))
 
         #Map to data coordinates 
         x = point.x()
