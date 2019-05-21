@@ -1,6 +1,11 @@
 #How to display cross hairs.
 #https://groups.google.com/forum/?fromgroups#!topic/pyqtgraph/zP-NjbuzOQc
 #https://groups.google.com/forum/?fromgroups#!topic/pyqtgraph/TGVqAalIfS4
+
+#Allow the local pyqtgraph package to be found
+import sys
+sys.path.insert(0, '../../pyqtgraph')
+
 from qt import *
 import pyqtgraph as pg
 from pyqtgraph import LinearRegionItem
@@ -12,7 +17,7 @@ import logging
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging
-
+print(pg.__file__)
 
 
 class PlotWidget(pg.GraphicsLayoutWidget):
@@ -36,7 +41,6 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         # self.plotscene = self.myplot.scene()
         # self.plotscene.sigMouseClicked.connect(self.onMouseClick)
         self.myplot.scene().sigMouseClicked.connect(self.onMouseClick)
-        self.viewbox = self.myplot.getViewBox()
         self.hregion = None #highlights zoom region
         self.vregion = None #highlights zoom region
         self.zoom_mode = 'xy' #or 'rect'
@@ -60,13 +64,13 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.zoom_pos = 0
         self.get_data()
         
-#         self.zoom_stack.append((min(self.t), max(self.t))) #save initial view
+        #ROI test
+#         pen = QPen(Qt.green, 0.1) #https://doc.qt.io/qt-5/qpen.html#details
+        self.roi = pg.ROI((0,0), (10e-3, 1), pen=None)
+        # self.roi.setBrush(Qt.Red)
+        self.myplot.addItem(self.roi)
         
-    # def mouseDragEvent(self, event):
-    #     print('mouseDragEvent')
-
-    # def mouseClicked(self, event):
-    #     print('mouseClicked')
+        
     def mousePressEvent(self, event):
         pos = event.pos()
         point = self.viewbox.mapSceneToView(pos)
@@ -82,6 +86,7 @@ class PlotWidget(pg.GraphicsLayoutWidget):
 #         self.myplot.addItem(self.vregion, ignoreBounds=True)
         # self.vline1.setPos(x)
         
+        #Comment out to disable zoom using LinearRegionItem
         if QApplication.keyboardModifiers() == Qt.ControlModifier: #zoom in vertical direction
             self.zoom_direction = self.y_dir
             self.vregion = pg.LinearRegionItem(orientation=LinearRegionItem.Horizontal)
@@ -94,7 +99,7 @@ class PlotWidget(pg.GraphicsLayoutWidget):
             startx = self._startCoord.x()
             self.hregion.setRegion((startx, startx))
             self.myplot.addItem(self.hregion, ignoreBounds=True)
-#         
+         
                     
         return QGraphicsView.mousePressEvent(self, event)   
 
@@ -188,8 +193,12 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         # self.myplot.addItem(self.vline2, ignoreBounds=True)
         # self.vline2.setPos(x)
 #         scene = self.myplot.scene()
+        
+        
         self.myscene.removeItem(self.hregion)
         self.myscene.removeItem(self.vregion)
+        
+        
         if self.moved:
             
             #If a zoom back was previously pressed, remove items ahead in the zoom stack
@@ -212,6 +221,14 @@ class PlotWidget(pg.GraphicsLayoutWidget):
                 xmax = xbounds[1]
                 ymin = min(point.y(), self._startCoord.y())
                 ymax = max(point.y(), self._startCoord.y())
+                
+            elif self.zoom_direction is None: #debug
+                xbounds = self.viewbox.viewRange()[0]
+                xmin = xbounds[0]
+                xmax = xbounds[1]
+                ybounds = self.viewbox.viewRange()[1]
+                ymin = ybounds[0]
+                ymax = ybounds[1]
                 
 #             xmin = min(point.x(), self._startCoord.x())
 #             xmax = max(point.x(), self._startCoord.x())
@@ -252,7 +269,10 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         else:
             logger.debug('End of zoom stack reached. zoom_pos: {}, len zoom_stack: {}'.format(self.zoom_pos, len(self.zoom_stack)))
 
-
+    def zoom_home(self):
+        logger.debug('Zooming home')
+        
+        
     def get_data(self):
         t = ConnectThread(100) #executes self.ble_wrapper.connect(self.selected_uuid)
         t.setDaemon(True)

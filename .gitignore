@@ -2,3 +2,5 @@
 .pydevproject
 pyqtExplorer/__pycache__/
 pyqtExplorer.zip
+.settings/
+pyqtExplorer/plotwidget2.py

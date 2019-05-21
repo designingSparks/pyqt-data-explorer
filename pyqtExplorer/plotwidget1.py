@@ -1,44 +1,51 @@
 #How to display cross hairs.
 #https://groups.google.com/forum/?fromgroups#!topic/pyqtgraph/zP-NjbuzOQc
 #https://groups.google.com/forum/?fromgroups#!topic/pyqtgraph/TGVqAalIfS4
+
+# In Eclipse, add the local pyqtgraph project dir as an external library to the PyDev PYTHONPATH or
+# import sys
+# sys.path.insert(0, '../../pyqtgraph')
+
 from qt import *
 import pyqtgraph as pg
+print(pg.__file__)
 # import pyqtgraph.exporters
 import numpy as np
 import os, sys
 import time
 import threading
+import numpy as np
+from eng_notation import eng
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
+class PlotWidget(pg.GraphicsLayoutWidget):
+    
+    def __init__(self, updateLabelfn=None):
+        super().__init__()
+        self.updateLabelfn = updateLabelfn
         self.setWindowTitle('Plot Widget')
 
-        self.myplot = pg.PlotWidget()
+        self.myplot = self.addPlot()
         self.myplot.showGrid(x=True,y=True)
-        proxy = pg.SignalProxy(self.myplot.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved) 
-        self.myplot.proxy = proxy
 
         self.viewbox = self.myplot.getViewBox()
-        #cross hair
-        self.vline = pg.InfiniteLine(angle=90, movable=False)
-        self.hline = pg.InfiniteLine(angle=0, movable=False)
-        self.myplot.addItem(self.vline, ignoreBounds=True)
-        self.myplot.addItem(self.hline, ignoreBounds=True)
+        self.viewbox.setMouseMode(pg.ViewBox.RectMode) #one button mode
+        self.viewbox.setZoomMode(pg.ViewBox.xZoom)
+        
+        #Cursor and dot
+        self.cursor = pg.CursorLine(angle=90, movable=True)
+        self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
+        self.plotHighlight = pg.ScatterPlotItem(size=10, pen={"color": "#8080ff"}, brush="#000000")
+        self.myplot.addItem(self.cursor, ignoreBounds=True)
+        self.myplot.addItem(self.plotHighlight, ignoreBounds=True)
+        
         self.setCentralWidget(self.myplot)
         self.show()
         self.get_data()
 
-    def mouseMoved(self, evt):
-        pos = evt[0]
-        print(pos)
-
-        #Map to data coordinates 
-        point = self.viewbox.mapSceneToView(pos)
-        print(point.x(), point.y())
-        self.vline.setPos(point.x()) 
-        self.hline.setPos(point.y()) 
 
     def get_data(self):
         t = ConnectThread(100) #executes self.ble_wrapper.connect(self.selected_uuid)
@@ -47,10 +54,31 @@ class MainWindow(QMainWindow):
         t.start()
 
     def plot_data(self, y):
-        t = np.linspace(0, 20e-3, 100)
-        self.myplot.plot(t, y)
+        self.xdata = np.linspace(0, 20e-3, 100)
+        self.ydata = y
+        self.myplot.plot(self.xdata, self.ydata)
+        self.viewbox.initZoomStack()
 
-
+    @Slot(float)
+    def updatePlotHighlight(self, xpos):
+        
+        idx = (np.abs(self.xdata - xpos)).argmin()
+        highlight_x = self.xdata[idx]
+        highlight_y = self.ydata[idx]
+        self.plotHighlight.setData([highlight_x], [highlight_y])
+        
+        if self.updateLabelfn is not None:
+            label_str = 'x={}, y={}'.format(eng(highlight_x), eng(highlight_y))
+            self.updateLabelfn(label_str)
+#         if self.zoom_pos > 0:
+#             self.zoom_pos -= 1
+#             last_pos = self.zoom_stack[self.zoom_pos]
+#             self.viewbox.setLimits(xMin=last_pos[0], xMax=last_pos[1], yMin=last_pos[2], yMax=last_pos[3])
+#             logger.debug('Zoomed back. zoom_pos: {}, len zoom_stack: {}'.format(self.zoom_pos, len(self.zoom_stack)))
+#         else:
+#             logger.debug('Start of zoom stack reached. zoom_pos: {}'.format(self.zoom_pos))
+        
+        
 class ConnectThread(threading.Thread, QObject):
     
     finished = Signal(list)
@@ -67,5 +95,5 @@ class ConnectThread(threading.Thread, QObject):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    mainWindow = MainWindow()
+    plot = PlotWidget()
     sys.exit(app.exec_())

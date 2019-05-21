@@ -17,7 +17,8 @@ IMAGE_DIR = os.path.join(BASEDIR, 'images')
 import logging
 console = logging.StreamHandler()
 console.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s.%(msecs)d    %(name)-12s %(levelname)-8s %(message)s', '%H:%M:%S') #includes ms
+formatter = logging.Formatter('%(asctime)s.%(msecs)d    %(name)-12s:%(lineno)-4d %(message)s', '%H:%M:%S') #includes ms
+# formatter = logging.Formatter('%(asctime)s.%(msecs)d    %(name)-12s %(levelname)-8s %(message)s', '%H:%M:%S') #includes ms
 #     formatter = logging.Formatter('%(name)-20s: %(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 root_logger = logging.getLogger('')
