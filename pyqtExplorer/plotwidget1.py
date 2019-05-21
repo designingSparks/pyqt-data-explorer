@@ -15,6 +15,8 @@ import os, sys
 import time
 import threading
 from eng_notation import eng
+import bokeh.palettes as pal
+from constants import LINEWIDTH
 
 import logging
 logger = logging.getLogger(__name__)
@@ -39,7 +41,6 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
         self.plotHighlight = pg.ScatterPlotItem(size=10, pen={"color": "#8080ff"}, brush="#000000")
         
-        
         self.setCentralWidget(self.myplot)
         self.show()
         self.get_data()
@@ -54,7 +55,14 @@ class PlotWidget(pg.GraphicsLayoutWidget):
     def plot_data(self, y):
         self.xdata = np.linspace(0, 20e-3, 100)
         self.ydata = y
-        self.myplot.plot(self.xdata, self.ydata)
+        
+        #https://bokeh.pydata.org/en/0.10.0/docs/reference/palettes.html
+#         mypen = pg.functions.mkPen({'color': pal.Blues[6][0], 'width': 1.5}) #blue
+#         mypen = pg.functions.mkPen({'color': pal.BuPu[6][0], 'width': 1.5}) #magenta
+        
+        #https://bokeh.pydata.org/en/latest/docs/reference/palettes.html
+        mypen = pg.functions.mkPen({'color': pal.RdBu[8][0], 'width': LINEWIDTH})
+        self.myplot.plot(self.xdata, self.ydata, pen=mypen)
         self.viewbox.initZoomStack()
 
     def show_cursor(self):
