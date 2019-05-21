@@ -14,7 +14,6 @@ import numpy as np
 import os, sys
 import time
 import threading
-import numpy as np
 from eng_notation import eng
 
 import logging
@@ -39,8 +38,7 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.cursor = pg.CursorLine(angle=90, movable=True)
         self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
         self.plotHighlight = pg.ScatterPlotItem(size=10, pen={"color": "#8080ff"}, brush="#000000")
-        self.myplot.addItem(self.cursor, ignoreBounds=True)
-        self.myplot.addItem(self.plotHighlight, ignoreBounds=True)
+        
         
         self.setCentralWidget(self.myplot)
         self.show()
@@ -59,6 +57,24 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.myplot.plot(self.xdata, self.ydata)
         self.viewbox.initZoomStack()
 
+    def show_cursor(self):
+        #Get the current viewbox limits
+        left = self.viewbox.viewRange()[0][0]
+        right = self.viewbox.viewRange()[0][1]
+        middle = np.average([left, right])
+        self.myplot.addItem(self.cursor, ignoreBounds=True)
+        self.myplot.addItem(self.plotHighlight, ignoreBounds=True)
+        
+        
+        idx = (np.abs(self.xdata - middle)).argmin()
+        xpos = self.xdata[idx]
+        self.cursor.setPos(pg.Point(xpos,0))
+        self.updatePlotHighlight(middle)
+        
+    def hide_cursor(self):
+        self.myplot.removeItem(self.cursor)
+        self.myplot.removeItem(self.plotHighlight)
+        
     @Slot(float)
     def updatePlotHighlight(self, xpos):
         
@@ -70,13 +86,6 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         if self.updateLabelfn is not None:
             label_str = 'x={}, y={}'.format(eng(highlight_x), eng(highlight_y))
             self.updateLabelfn(label_str)
-#         if self.zoom_pos > 0:
-#             self.zoom_pos -= 1
-#             last_pos = self.zoom_stack[self.zoom_pos]
-#             self.viewbox.setLimits(xMin=last_pos[0], xMax=last_pos[1], yMin=last_pos[2], yMax=last_pos[3])
-#             logger.debug('Zoomed back. zoom_pos: {}, len zoom_stack: {}'.format(self.zoom_pos, len(self.zoom_stack)))
-#         else:
-#             logger.debug('Start of zoom stack reached. zoom_pos: {}'.format(self.zoom_pos))
         
         
 class ConnectThread(threading.Thread, QObject):

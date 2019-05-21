@@ -31,18 +31,12 @@ class MainWindow(QMainWindow):
         self.backAction.setEnabled(False)
         self.forwardAction.setEnabled(False)
         
-        
-        
         self.setCentralWidget(self.plotwidget)
         self.show()
         
         
-        
     def createActions(self):
-        '''
-        Toolbar actions
-        '''
-        
+        '''Toolbar actions'''
         icon = QIcon(os.path.join(IMAGE_DIR, 'back.png'))
         self.backAction = QAction(icon, "Back", self, shortcut=QKeySequence.Back,
                  triggered=self.plotwidget.viewbox.zoom_back)
@@ -59,7 +53,6 @@ class MainWindow(QMainWindow):
         self.zoomAction = QAction(icon, "Free zoom", self, shortcut="Ctrl+Z",
                  triggered=self.zoom_free)
         self.zoomAction.setCheckable(True)
-        
         
         icon = QIcon(os.path.join(IMAGE_DIR, 'zoom_constrained.png'))
         self.zoomConstrainedAction = QAction(icon, "Constrained zoom", self, shortcut="Ctrl+X",
@@ -105,8 +98,12 @@ class MainWindow(QMainWindow):
         show = self.dataCursorAction.isChecked()
         if show:
             logger.debug('Showing cursor')
+            self.plotwidget.show_cursor()
         else:
             logger.debug('Hiding cursor')
+            self.plotwidget.hide_cursor()
+            self.status_bar.showMessage('')
+            
     def settings_action(self):
         pass
     
