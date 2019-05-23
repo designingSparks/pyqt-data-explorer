@@ -12,7 +12,7 @@ else:
     
 IMAGE_DIR = os.path.join(BASEDIR, 'images')
 
-LINEWIDTH = 1.5
+LINEWIDTH = 2
 
 #Logger setup
 import logging

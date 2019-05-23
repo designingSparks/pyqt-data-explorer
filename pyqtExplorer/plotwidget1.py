@@ -16,11 +16,16 @@ import time
 import threading
 from eng_notation import eng
 import bokeh.palettes as pal
+'''
+Don't set as the central widget otherwise resizing won't work!
+'''
 from constants import LINEWIDTH
-
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging
+pg.setConfigOption('background', 'w')
+pg.setConfigOption('foreground', 'k')
+pg.setConfigOption('antialias', True) #Plotted curve looks nicer
 
 class PlotWidget(pg.GraphicsLayoutWidget):
     
@@ -28,11 +33,18 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         super().__init__()
         self.updateLabelfn = updateLabelfn
         self.setWindowTitle('Plot Widget')
+        self.ci.layout.setContentsMargins(0,25,30,20) #left, top, right, bottom
+        
 
         self.myplot = self.addPlot()
-        self.myplot.showGrid(x=True,y=True)
-
-        self.viewbox = self.myplot.getViewBox()
+        
+#         self.myplot = self.addPlot(axisItems = {'left', 'right'})
+        self.viewbox = self.myplot.getViewBox() #correct method
+#         self.viewbox.setBackgroundColor((192,192,192))
+        [ self.myplot.getAxis(ax).setZValue(1000) for ax in self.myplot.axes ] #Otherwise setBackgroundColor paints over the axis lines
+        #Could also directly patch PlotItem.axis.setZValue(-1000) to 1
+        self.myplot.showGrid(True, True, 0.5)
+#         self.myplot.showGrid(x=True,y=True) 
         self.viewbox.setMouseMode(pg.ViewBox.RectMode) #one button mode
         self.viewbox.setZoomMode(pg.ViewBox.xZoom)
         
@@ -41,10 +53,12 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
         self.plotHighlight = pg.ScatterPlotItem(size=10, pen={"color": "#8080ff"}, brush="#000000")
         
-        self.setCentralWidget(self.myplot)
+#         self.resize(800,800)
+#         self.viewbox.resize(800,800)
         self.show()
         self.get_data()
-
+        
+        
 
     def get_data(self):
         t = ConnectThread(100) #executes self.ble_wrapper.connect(self.selected_uuid)
