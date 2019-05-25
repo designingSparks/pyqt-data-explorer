@@ -37,24 +37,41 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         
 
         self.myplot = self.addPlot()
-        
-#         self.myplot = self.addPlot(axisItems = {'left', 'right'})
         self.viewbox = self.myplot.getViewBox() #correct method
-#         self.viewbox.setBackgroundColor((192,192,192))
-        [ self.myplot.getAxis(ax).setZValue(1000) for ax in self.myplot.axes ] #Otherwise setBackgroundColor paints over the axis lines
+        self.myplot.showGrid(x=True,y=True) 
+#         self.myplot.showGrid(True, True, 0.5)
+#         self.viewbox.background.setZValue(-1000) #doesn't help
+        self.viewbox.setBackgroundColor((192,192,192)) #See also ViewBox #203
+
+#         self.viewbox.background.setVisible(True)
+#         self.viewbox.background.show()
+#         self.viewbox.background.setBrush(pg.functions.mkBrush({'color': (192,192,192)}))
+
+#        This causes an offset when zooming!
+#         [ self.myplot.getAxis(ax).setZValue(1000) for ax in self.myplot.axes ] #Otherwise setBackgroundColor paints over the axis lines
+
+        keys = ['bottom', 'left']
+        for k in keys:
+            axis = self.myplot.getAxis(k)
+            axis.setZValue(1) #See also PlotItem #169
+        
+#         for ax in self.myplot.axes:
+#             axis = self.myplot.getAxis(ax)
+#             axis.setZValue(1000)
+
         #Could also directly patch PlotItem.axis.setZValue(-1000) to 1
-        self.myplot.showGrid(True, True, 0.5)
-#         self.myplot.showGrid(x=True,y=True) 
         self.viewbox.setMouseMode(pg.ViewBox.RectMode) #one button mode
         self.viewbox.setZoomMode(pg.ViewBox.xZoom)
+        
+        self.myplot.showAxis('top')
+        self.myplot.showAxis('right')
+        self.myplot.getAxis('top').setStyle(tickLength=0, showValues=False)
+        self.myplot.getAxis('right').setStyle(tickLength=0, showValues=False)
         
         #Cursor and dot
         self.cursor = pg.CursorLine(angle=90, movable=True)
         self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
         self.plotHighlight = pg.ScatterPlotItem(size=10, pen={"color": "#8080ff"}, brush="#000000")
-        
-#         self.resize(800,800)
-#         self.viewbox.resize(800,800)
         self.show()
         self.get_data()
         
