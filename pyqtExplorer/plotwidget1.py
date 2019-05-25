@@ -20,6 +20,9 @@ import bokeh.palettes as pal
 Don't set as the central widget otherwise resizing won't work!
 '''
 from constants import LINEWIDTH
+MYPEN = pg.functions.mkPen({'color': pal.RdBu[8][0], 'width': LINEWIDTH})
+COLOR1 = pal.RdBu[8][0]
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging
@@ -55,9 +58,9 @@ class PlotWidget(pg.GraphicsLayoutWidget):
             axis = self.myplot.getAxis(k)
             axis.setZValue(1) #See also PlotItem #169
         
-#         for ax in self.myplot.axes:
-#             axis = self.myplot.getAxis(ax)
-#             axis.setZValue(1000)
+#         self.myplot.getAxis("bottom").setPen({"color": (255, 255, 255), "width": 5})
+#         self.myplot.getAxis("left").setPen({"color": (255, 255, 255), "width": 5})
+
 
         #Could also directly patch PlotItem.axis.setZValue(-1000) to 1
         self.viewbox.setMouseMode(pg.ViewBox.RectMode) #one button mode
@@ -69,9 +72,10 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.myplot.getAxis('right').setStyle(tickLength=0, showValues=False)
         
         #Cursor and dot
-        self.cursor = pg.CursorLine(angle=90, movable=True)
+        mypen = pg.functions.mkPen({'color': (255,255,255), 'width': 2})  #white
+        self.cursor = pg.CursorLine(angle=90, movable=True, pen=mypen)
         self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
-        self.plotHighlight = pg.ScatterPlotItem(size=10, pen={"color": "#8080ff"}, brush="#000000")
+        self.plotHighlight = pg.ScatterPlotItem(size=5, pen=MYPEN, brush=COLOR1)
         self.show()
         self.get_data()
         
@@ -86,14 +90,15 @@ class PlotWidget(pg.GraphicsLayoutWidget):
     def plot_data(self, y):
         self.xdata = np.linspace(0, 20e-3, 100)
         self.ydata = y
+        self.cursor.xvals = self.xdata
         
         #https://bokeh.pydata.org/en/0.10.0/docs/reference/palettes.html
 #         mypen = pg.functions.mkPen({'color': pal.Blues[6][0], 'width': 1.5}) #blue
 #         mypen = pg.functions.mkPen({'color': pal.BuPu[6][0], 'width': 1.5}) #magenta
         
         #https://bokeh.pydata.org/en/latest/docs/reference/palettes.html
-        mypen = pg.functions.mkPen({'color': pal.RdBu[8][0], 'width': LINEWIDTH})
-        self.myplot.plot(self.xdata, self.ydata, pen=mypen)
+        curve = self.myplot.plot(self.xdata, self.ydata, pen=MYPEN)
+        curve.setZValue(1e6)
         self.viewbox.initZoomStack()
 
     def show_cursor(self):
