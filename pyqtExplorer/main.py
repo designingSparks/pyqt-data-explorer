@@ -2,10 +2,11 @@
 '''
 from qt import *
 import os, sys
+import sys
 from constants import IMAGE_DIR
 import pyqtgraph as pg
-# from plotwidget import PlotWidget
-from plotwidget1 import PlotWidget
+from plotwidget import PlotWidget
+# from plotwidget1 import PlotWidget
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG) #Change to NOTSET to disable logging

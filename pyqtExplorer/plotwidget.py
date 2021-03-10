@@ -4,8 +4,6 @@
 
 # In Eclipse, add the local pyqtgraph project dir as an external library to the PyDev PYTHONPATH or
 import sys
-sys.path.insert(0, '../../pyqtgraph')
-
 from qt import *
 import pyqtgraph as pg
 print(pg.__file__)
@@ -48,7 +46,7 @@ class PlotWidget(pg.GraphicsLayoutWidget):
 
         self.viewbox2 = self.myplot.getViewBox2()
         self.viewbox2.setZValue(-1001) #get z value of self.viewbox1 and subtract 1.
-        self.viewbox2.setBackgroundColor((192,192,192))
+        self.viewbox2.setBackgroundColor((192,192,192)) #grey
         
 #         self.viewbox.background.setVisible(True)
 #         self.viewbox.background.show()
@@ -83,7 +81,7 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
         self.plotHighlight = pg.ScatterPlotItem(size=5, pen=MYPEN, brush=COLOR1)
         self.show()
-        self.get_data()
+        # self.get_data()
         
         
 
