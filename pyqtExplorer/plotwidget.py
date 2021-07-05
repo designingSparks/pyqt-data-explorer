@@ -81,7 +81,7 @@ class PlotWidget(pg.GraphicsLayoutWidget):
         self.cursor.sigPositionChanged.connect(self.updatePlotHighlight)
         self.plotHighlight = pg.ScatterPlotItem(size=5, pen=MYPEN, brush=COLOR1)
         self.show()
-        # self.get_data()
+        self.get_data()
         
         
 
